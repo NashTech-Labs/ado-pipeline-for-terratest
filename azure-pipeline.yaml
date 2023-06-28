@@ -72,7 +72,9 @@ jobs:
         source $(HOME)/.bashrc
         go version
       displayName: 'Install Go'
-    
+
+# check the version of go
+
     - script: |
        ls /usr/local/go
        export PATH=$PATH:/usr/local/go/bin
@@ -80,7 +82,7 @@ jobs:
       displayName: 'checking GO version'
 
 
-
+# just printing the values of the credential which i have define in the environment.
       
     - script: |
         go version
@@ -90,6 +92,8 @@ jobs:
         echo $(ARM_SUBSCRIPTION_ID)
       displayName: 'Print the variable'
 
+
+# exporting the credential in the agent
 
     - task: Bash@3
       displayName: 'Export Variables'
@@ -108,6 +112,9 @@ jobs:
             export ARM_TENANT_ID="$ARM_TENANT_ID"
             export ARM_CLIENT_SECRET="$ARM_CLIENT_SECRET"
           fi
+
+# printing the exported values to verify
+
     - script: |
         echo "ARM_SUBSCRIPTION: $ARM_SUBSCRIPTION_ID"
         echo "ARM_CLIENT: $ARM_CLIENT_ID"
@@ -115,6 +122,8 @@ jobs:
         echo "ARM_CLIENT_SECRET_ID: $ARM_CLIENT_SECRET"
       displayName: 'Print Environment Variables'
 
+
+# install the required tool for terraform run
 
     - task: Bash@3
       displayName: 'Install Build Tools'
@@ -128,13 +137,12 @@ jobs:
           # Check the installed version of gcc
           gcc --version
           
-          
+# script to run the terratest code 
 
     - script: |
           export PATH=$PATH:/usr/local/go/bin
           pwd
           cd terratest
-          # go get github.com/gruntwork-io/terratest/modules/terraform
           go get github.com/gruntwork-io/terratest/modules/terraform
           go mod init github.com/test/subscription-module-test
           go mod tidy
