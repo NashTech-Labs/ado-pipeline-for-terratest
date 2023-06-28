@@ -14,4 +14,4 @@
             ARM_CLIENT_SECRET
 
 
-### Step2:- Trigger the ADO pipeline manually because i have mention it to runn manually.
+### Step2:- Trigger the ADO pipeline manually because i have mention it to run manually.
