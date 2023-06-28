@@ -1,5 +1,6 @@
 trigger: none
 
+# setup the varibale group to fetch the credential information
 
 variables:
   - group: Azure_credential
@@ -8,9 +9,13 @@ variables:
 jobs:
 - job: Build
 
+# define the pool for thr ADO agent
+
   pool:
     name: Default
 
+
+# Script that will create the folder where the repo will checkout
   steps:
     - script: |
         echo $(System.DefaultWorkingDirectory)
@@ -19,6 +24,7 @@ jobs:
         pwd
       displayName: 'Create folders'
 
+# checkout the repository
 
     - checkout: self
       displayName: 'Checkout main repo'
@@ -36,6 +42,7 @@ jobs:
         python3 --version
       displayName: 'Verify Python Installation'
 
+# terraform installation
 
     - script: |
         sudo apt-get update
@@ -47,6 +54,7 @@ jobs:
         terraform --version
       displayName: 'Install Terraform'
       
+# verify the terraform version
     - script: |
         terraform version
       displayName: 'Verify Python Installation'
