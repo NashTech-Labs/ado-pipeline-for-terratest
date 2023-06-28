@@ -1,0 +1,1 @@
+## ADO pipeline to run the terratest code to test the subscription moduel

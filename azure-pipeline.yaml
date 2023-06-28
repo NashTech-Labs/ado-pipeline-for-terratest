@@ -1,0 +1,135 @@
+trigger: none
+
+
+variables:
+  - group: Azure_credential
+
+
+jobs:
+- job: Build
+
+  pool:
+    name: Default
+
+  steps:
+    - script: |
+        echo $(System.DefaultWorkingDirectory)
+        currentPath=$(dirname "$(System.DefaultWorkingDirectory)")
+        mkdir "$currentPath/terratest"
+        pwd
+      displayName: 'Create folders'
+
+
+    - checkout: self
+      displayName: 'Checkout main repo'
+      path: terratest
+      clean: true
+      
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+
+
+    - script: |
+        python3 --version
+      displayName: 'Verify Python Installation'
+
+
+    - script: |
+        sudo apt-get update
+        sudo apt-get install -y unzip
+        curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
+        unzip terraform_1.5.0_linux_amd64.zip
+        rm -rf terraform_1.*
+        sudo mv terraform /usr/local/bin/
+        terraform --version
+      displayName: 'Install Terraform'
+      
+    - script: |
+        terraform version
+      displayName: 'Verify Python Installation'
+
+    - script: |
+        curl -LO https://golang.org/dl/go1.17.2.linux-amd64.tar.gz
+        sudo tar -C /usr/local -xzf go1.17.2.linux-amd64.tar.gz
+        rm -rf go1.*
+        export GOROOT=/usr/local/go
+        export GOPATH=$(HOME)/go
+        export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+        echo "export GOROOT=/usr/local/go" >> $(HOME)/.bashrc
+        echo "export GOPATH=$(HOME)/go" >> $(HOME)/.bashrc
+        echo "export PATH=\$GOROOT/bin:\$GOPATH/bin:\$PATH" >> $(HOME)/.bashrc
+        source $(HOME)/.bashrc
+        go version
+      displayName: 'Install Go'
+    
+    - script: |
+       ls /usr/local/go
+       export PATH=$PATH:/usr/local/go/bin
+       go version
+      displayName: 'checking GO version'
+
+
+
+      
+    - script: |
+        go version
+        echo $(ARM_CLIENT_ID)
+        echo $(ARM_CLIENT_SECRET)
+        echo $(ARM_TENANT_ID)
+        echo $(ARM_SUBSCRIPTION_ID)
+      displayName: 'Print the variable'
+
+
+    - task: Bash@3
+      displayName: 'Export Variables'
+      inputs:
+        targetType: 'inline'
+        script: |
+          if [ "$AGENT_OS" == "Linux" ]; then
+            export ARM_SUBSCRIPTION="$ARM_SUBSCRIPTION_ID"
+            export ARM_CLIENT="$ARM_CLIENT_ID"
+            export ARM_TENANT="$ARM_TENANT_ID"
+            export ARM_CLIENT_SECRET_ID="$ARM_CLIENT_SECRET"
+
+          elif [ "$AGENT_OS" == "Windows_NT" ]; then
+            export ARM_SUBSCRIPTION_ID="$ARM_SUBSCRIPTION_ID"
+            export ARM_CLIENT_ID="$ARM_CLIENT_ID"
+            export ARM_TENANT_ID="$ARM_TENANT_ID"
+            export ARM_CLIENT_SECRET="$ARM_CLIENT_SECRET"
+          fi
+    - script: |
+        echo "ARM_SUBSCRIPTION: $ARM_SUBSCRIPTION_ID"
+        echo "ARM_CLIENT: $ARM_CLIENT_ID"
+        echo "ARM_TENANT: $ARM_TENANT_ID"
+        echo "ARM_CLIENT_SECRET_ID: $ARM_CLIENT_SECRET"
+      displayName: 'Print Environment Variables'
+
+
+    - task: Bash@3
+      displayName: 'Install Build Tools'
+      inputs:
+        targetType: 'inline'
+        script: |
+          # Install build tools (gcc, make, etc.)
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+          
+          # Check the installed version of gcc
+          gcc --version
+          
+          
+
+    - script: |
+          export PATH=$PATH:/usr/local/go/bin
+          pwd
+          cd terratest
+          # go get github.com/gruntwork-io/terratest/modules/terraform
+          go get github.com/gruntwork-io/terratest/modules/terraform
+          go mod init github.com/test/subscription-module-test
+          go mod tidy
+          go get github.com/gruntwork-io/terratest/modules/terraform
+          go test -v -timeout 50m
+      displayName: 'Initialize the go and run test'
