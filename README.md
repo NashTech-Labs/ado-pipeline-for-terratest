@@ -8,10 +8,10 @@
 
     1. Make sure to follow the naming convention while setup the values in the library:-
 
-            ARM_SUBSCRIPTION_ID,
-            ARM_CLIENT_ID,
-            ARM_TENANT_ID,
-            ARM_CLIENT_SECRET
+            SUBSCRIPTION_ID,
+            CLIENT_ID,
+            TENANT_ID,
+            CLIENT_SECRET
 
 
 ### Step2:- Trigger the ADO pipeline manually because i have mention it to run manually.
